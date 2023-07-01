@@ -1,34 +1,32 @@
+import 'package:absenteeism_v2/controllers/authorize/authorize_service.dart';
+import 'package:absenteeism_v2/models/authentication/Login.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-
-import 'home_page.dart';
+import 'get_started.dart';
 import 'signup_page.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 
-class Login extends StatefulWidget {
-  const Login({
-    Key? key,
-  }) : super(key: key);
+class LoginPage extends StatefulWidget {
+  const LoginPage({Key? key}) : super(key: key);
 
   @override
-  State<Login> createState() => _LoginState();
+  State<LoginPage> createState() => _LoginPageState();
 }
 
-class _LoginState extends State<Login> {
+class _LoginPageState extends State<LoginPage> {
   final GlobalKey<FormState> _formKey = GlobalKey();
 
   final FocusNode _focusNodePassword = FocusNode();
   final TextEditingController _controllerUsername = TextEditingController();
   final TextEditingController _controllerPassword = TextEditingController();
+  bool isLoading = false;
 
   bool _obscurePassword = true;
   final Box _boxLogin = Hive.box("login");
-  final Box _boxAccounts = Hive.box("accounts");
 
   @override
   Widget build(BuildContext context) {
-    if (_boxLogin.get("loginStatus") ?? false) {
-      return Home();
-    }
 
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.primaryContainer,
@@ -53,7 +51,7 @@ class _LoginState extends State<Login> {
                 controller: _controllerUsername,
                 keyboardType: TextInputType.name,
                 decoration: InputDecoration(
-                  labelText: "Username / Email",
+                  labelText: "Username",
                   prefixIcon: const Icon(Icons.person_outline),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
@@ -66,10 +64,7 @@ class _LoginState extends State<Login> {
                 validator: (String? value) {
                   if (value == null || value.isEmpty) {
                     return "Please enter username.";
-                  } else if (!_boxAccounts.containsKey(value)) {
-                    return "Username is not registered.";
                   }
-
                   return null;
                 },
               ),
@@ -101,11 +96,7 @@ class _LoginState extends State<Login> {
                 validator: (String? value) {
                   if (value == null || value.isEmpty) {
                     return "Please enter password.";
-                  } else if (value !=
-                      _boxAccounts.get(_controllerUsername.text)) {
-                    return "Wrong password.";
                   }
-
                   return null;
                 },
               ),
@@ -119,23 +110,14 @@ class _LoginState extends State<Login> {
                         borderRadius: BorderRadius.circular(20),
                       ),
                     ),
-                    onPressed: () {
-                      if (_formKey.currentState?.validate() ?? false) {
-                        _boxLogin.put("loginStatus", true);
-                        _boxLogin.put("userName", _controllerUsername.text);
-
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) {
-                              return Home();
-                            },
-                          ),
-                        );
-                      }
+                    onPressed: () async {
+                      var login = Login(username: _controllerUsername.text,
+                          password: _controllerPassword.text);
+                      await _body(login);
                     },
                     child: const Text("Login"),
                   ),
+
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -143,7 +125,6 @@ class _LoginState extends State<Login> {
                       TextButton(
                         onPressed: () {
                           _formKey.currentState?.reset();
-
                           Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -164,6 +145,67 @@ class _LoginState extends State<Login> {
         ),
       ),
     );
+  }
+  Future<void> _body(Login login) async {
+    final dio = Dio();
+    final authService = AuthorizeService(dio);
+
+    try {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return Center(
+            child: SpinKitFadingCircle(
+              itemBuilder: (BuildContext context, int index) {
+                return DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: index.isEven ? Colors.purple : Colors.purpleAccent,
+                  ),
+                );
+              },
+            ),
+          );
+        },
+      );
+
+      var token = await authService.getTokenWithLogin(login);
+
+      Navigator.pop(context); // Progress dialog kapat
+
+      if (token != null) {
+        _boxLogin.put("loginStatus", token);
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) {
+              return const GetStarted();
+            },
+          ),
+        );
+      } else {
+        print("Hata: Token boş döndü.");
+      }
+    } catch (e) {
+      print("Hata: $e");
+      Navigator.pop(context); // Progress dialog kapat
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text("Hata"),
+            content: Text("Bir hata oluştu. Lütfen tekrar deneyin."),
+            actions: <Widget>[
+              TextButton(
+                child: Text("Tamam"),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        },
+      );
+    }
   }
 
   @override

@@ -1,4 +1,4 @@
-import 'package:absenteeism_v2/pages/addourse/course_add_page.dart';
+import 'package:absenteeism_v2/views/get_started.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
@@ -228,7 +228,7 @@ class _SignupState extends State<Signup> {
                           context,
                           MaterialPageRoute(
                             builder: (context) {
-                              return CourseAdd();
+                              return GetStarted();
                             },
                           ),
                         );
