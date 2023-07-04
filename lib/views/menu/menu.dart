@@ -1,4 +1,5 @@
 import 'package:absenteeism_v2/views/menu/mainpage/main_page.dart';
+import 'package:absenteeism_v2/views/menu/profile/user_information.dart';
 import 'package:absenteeism_v2/views/menu/syllabus/syllabus_view.dart';
 import 'package:flutter/material.dart';
 
@@ -25,7 +26,7 @@ class _MenuState extends State<Menu> {
     SyllabusView(),
     Placeholder(),
     AddAllPage(),
-    AddCourseCalendarPage()
+    UserInfoPage(),
   ];
   @override
   Widget build(BuildContext context) {

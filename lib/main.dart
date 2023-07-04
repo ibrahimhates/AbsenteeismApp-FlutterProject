@@ -5,7 +5,7 @@ import 'main_app.dart';
 
 void main() async {
   await _initHive();
-  runApp(const MainApp());
+  runApp(MainApp());
 }
 
 Future<void> _initHive() async{

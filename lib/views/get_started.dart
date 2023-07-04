@@ -13,8 +13,16 @@ class GetStarted extends StatefulWidget {
 class _GetStartedState extends State<GetStarted> {
   final Box _firstTimeOpen = Hive.box("getStarted");
 
+  bool checkFirstTimeOpen(){
+    if(_firstTimeOpen.get("isOpen") == true)
+      return true;
+    return false;
+  }
   @override
   Widget build(BuildContext context) {
+    return checkFirstTimeOpen()?Menu():Scfull();
+  }
+  Widget Scfull(){
     return Scaffold(
       backgroundColor: Color.fromRGBO(140, 82, 255, 1.0),
       body: Stack(
@@ -72,7 +80,7 @@ class _GetStartedState extends State<GetStarted> {
                   ),
                   child: ElevatedButton(
                     onPressed: () => {
-                      _firstTimeOpen.put("getStarted", true),
+                      _firstTimeOpen.put("isOpen", true),
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(

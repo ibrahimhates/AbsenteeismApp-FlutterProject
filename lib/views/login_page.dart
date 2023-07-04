@@ -193,7 +193,7 @@ class _LoginPageState extends State<LoginPage> {
         builder: (BuildContext context) {
           return AlertDialog(
             title: Text("Hata"),
-            content: Text("Bir hata oluştu. Lütfen tekrar deneyin."),
+            content: Text("Kullanıcı Adı veya Şifre Hatalı"),
             actions: <Widget>[
               TextButton(
                 child: Text("Tamam"),

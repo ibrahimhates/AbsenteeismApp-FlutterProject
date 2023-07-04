@@ -31,9 +31,7 @@ class _SyllabusViewState extends State<SyllabusView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Center(
-          child: Text('Program'),
-        ),
+        title: Text('Program'),
       ),
       body: FutureBuilder<List<Syllabus>>(
         future: fetchSyllabus(),
